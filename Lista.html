@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Compras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    :root {
+      --bg: #f4f4f4;
+      --text: #333;
+      --container-bg: #fff;
+      --input-bg: #fff;
+      --input-border: #ccc;
+      --btn-bg: #2e7d32;
+      --btn-bg-hover: #1b5e20;
+      --btn-text: #fff;
+      --comprado-bg: #d0f0d0;
+      --comprado-text: #2e7d32;
+      --remover-bg: #dc3545;
+      --remover-bg-hover: #a71d2a;
+      --comprar-btn-bg: #007bff;
+      --comprar-btn-bg-hover: #0056b3;
+      --editar-btn-bg: #ff9800;
+      --editar-btn-bg-hover: #e65100;
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --input-bg: #2c2c2c;
+      --input-border: #555;
+      --btn-bg: #388e3c;
+      --btn-bg-hover: #2e7d32;
+      --btn-text: #e0e0e0;
+      --comprado-bg: #264d26;
+      --comprado-text: #a5d6a7;
+      --remover-bg: #b71c1c;
+      --remover-bg-hover: #7f0000;
+      --comprar-btn-bg: #1565c0;
+      --comprar-btn-bg-hover: #0d47a1;
+      --editar-btn-bg: #e65100;
+      --editar-btn-bg-hover: #ff9800;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: var(--container-bg);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--btn-bg);
+    }
+
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    /* Estilo para todos os inputs do form-group */
+    .form-group input {
+      padding: 10px;
+      border: 1px solid var(--input-border);
+      border-radius: 5px;
+      font-size: 15px;
+      background-color: var(--input-bg);
+      color: var(--text);
+      transition: border-color 0.3s;
+    }
+
+    /* Tamanho específico para cada input */
+    #item {
+      flex: 3; /* Ocupa 3x mais espaço que os outros */
+    }
+
+    #quantidade, #preco {
+      flex: 1; /* Ocupam 1x espaço */
+    }
+
+    .form-group input:focus {
+      border-color: var(--btn-bg);
+      outline: none;
+    }
+
+    .form-group button {
+      padding: 10px 15px;
+      background-color: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .form-group button:hover {
+      background-color: var(--btn-bg-hover);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--input-bg);
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 5px;
+      color: var(--text);
+      transition: background-color 0.3s, color 0.3s;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    li.comprado {
+      background-color: var(--comprado-bg);
+      text-decoration: line-through;
+      color: var(--comprado-text);
+    }
+
+    .info {
+      flex: 1;
+      user-select: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: background-color 0.3s;
+    }
+
+    .comprar-btn {
+      background-color: var(--comprar-btn-bg);
+    }
+
+    .comprar-btn:hover {
+      background-color: var(--comprar-btn-bg-hover);
+    }
+
+    .remover-btn {
+      background-color: var(--remover-bg);
+    }
+
+    .remover-btn:hover {
+      background-color: var(--remover-bg-hover);
+    }
+
+    .editar-btn {
+      background-color: var(--editar-btn-bg);
+    }
+
+    .editar-btn:hover {
+      background-color: var(--editar-btn-bg-hover);
+    }
+
+    .total {
+      text-align: right;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 15px;
+      color: var(--text);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--btn-bg);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      color: var(--text);
+    }
+    
+    /* Botão modo escuro fixo no canto superior direito */
+    #toggleDark {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 1000;
+      transition: background-color 0.3s;
+    }
+
+    #toggleDark:hover {
+      background-color: var(--btn-bg-hover);
+    }
+
+    @media (max-width: 500px) {
+      .form-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-group input,
+      .form-group button {
+        width: 100%;
+      }
+
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .actions {
+        align-self: flex-end;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 5px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="toggleDark">Modo Escuro</button>
+
+  <div class="container">
+    <h1>🛒 Lista de Compras</h1>
+
+    <div class="form-group">
+      <input type="text" id="item" placeholder="Item" required />
+      <input type="number" id="quantidade" placeholder="Qtd" min="1" value="1" />
+      <input type="number" id="preco" placeholder="Preço (R$)" step="0.01" min="0" />
+      <button onclick="adicionarItem()">Adicionar</button>
+    </div>
+
+    <div class="stats" id="stats">
+      <span>Total de itens: 0</span>
+      <span>Comprados: 0</span>
+      <span>Restantes: 0</span>
+    </div>
+
+    <h2>Itens Pendentes</h2>
+    <ul id="lista-pendentes"></ul>
+
+    <h2>Itens Comprados</h2>
+    <ul id="lista-comprados"></ul>
+
+    <div class="total" id="total">Total: R$ 0,00</div>
+  </div>
+
+  <script>
+    let listaCompras = [];
+
+    // Formata número para moeda brasileira
+    function formatar(valor) {
+      return 'R$ ' + valor.toFixed(2).replace('.', ',');
+    }
+
+    // Atualiza totais e estatísticas na tela
+    function atualizarUI() {
+      const total = listaCompras.reduce((acc, item) => acc + item.subtotal, 0);
+      document.getElementById('total').textContent = 'Total: ' + formatar(total);
+
+      const totalItens = listaCompras.length;
+      const comprados = listaCompras.filter(item => item.comprado).length;
+      const restantes = totalItens - comprados;
+
+      const stats = document.getElementById('stats');
+      stats.innerHTML = `
+        <span>Total de itens: ${totalItens}</span>
+        <span>Comprados: ${comprados}</span>
+        <span>Restantes: ${restantes}</span>
+      `;
+    }
+
+    // Salva lista no localStorage
+    function salvarLocalStorage() {
+      localStorage.setItem('listaCompras', JSON.stringify(listaCompras));
+    }
+
+    // Carrega lista do localStorage
+    function carregarLocalStorage() {
+      const dados = localStorage.getItem('listaCompras');
+      if (dados) {
+        listaCompras = JSON.parse(dados);
+        listaCompras.forEach(item => {
+          if (item.comprado) {
+            criarItemNaTela(item, 'comprados');
+          } else {
+            criarItemNaTela(item, 'pendentes');
+          }
+        });
+        atualizarUI();
+      }
+    }
+
+    // Cria item na tela com botões de ação
+    function criarItemNaTela(item, tipoLista) {
+      const li = document.createElement('li');
+      if (tipoLista === 'comprados') {
+        li.classList.add('comprado');
+      }
+
+      const info = document.createElement('div');
+      info.className = 'info';
+      info.textContent = `${item.nome} — ${item.quantidade} x ${formatar(item.preco)} = ${formatar(item.subtotal)}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      // Botão para mover o item entre as listas
+      const btnMover = document.createElement('button');
+      btnMover.className = 'comprar-btn';
+      btnMover.textContent = (tipoLista === 'pendentes') ? 'Comprado' : 'Não Comprado';
+      btnMover.onclick = () => {
+        const itemAtual = listaCompras.find(i => i.nome === item.nome && i.quantidade === item.quantidade && i.preco === item.preco);
+        if (itemAtual) {
+          itemAtual.comprado = !itemAtual.comprado;
+          li.remove();
+          
+          if (itemAtual.comprado) {
+            criarItemNaTela(itemAtual, 'comprados');
+          } else {
+            criarItemNaTela(itemAtual, 'pendentes');
+          }
+          salvarLocalStorage();
+          atualizarUI();
+        }
+      };
+
+      // Botão remover item
+      const btnRemover = document.createElement('button');
+      btnRemover.className = 'remover-btn';
+      btnRemover.textContent = 'Remover';
+      btnRemover.onclick = () => {
+        listaCompras = listaCompras.filter(i => i.nome !== item.nome || i.quantidade !== item.quantidade || i.preco !== item.preco);
+        li.remove();
+        salvarLocalStorage();
+        atualizarUI();
+      };
+
+      // Botão editar item
+      const btnEditar = document.createElement('button');
+      btnEditar.className = 'editar-btn';
+      btnEditar.textContent = 'Editar';
+      btnEditar.onclick = () => editarItem(item, li, tipoLista);
+
+      actions.appendChild(btnMover);
+      actions.appendChild(btnEditar);
+      actions.appendChild(btnRemover);
+
+      li.appendChild(info);
+      li.appendChild(actions);
+
+      document.getElementById('lista-' + tipoLista).appendChild(li);
+    }
+
+    // Função para editar um item
+    function editarItem(item, li, tipoLista) {
+      li.innerHTML = '';
+
+      const inputNome = document.createElement('input');
+      inputNome.type = 'text';
+      inputNome.value = item.nome;
+      inputNome.style.flex = '2';
+
+      const inputQtd = document.createElement('input');
+      inputQtd.type = 'number';
+      inputQtd.min = 1;
+      inputQtd.value = item.quantidade;
+      inputQtd.style.flex = '1';
+
+      const inputPreco = document.createElement('input');
+      inputPreco.type = 'number';
+      inputPreco.step = '0.01';
+      inputPreco.min = 0;
+      inputPreco.value = item.preco.toFixed(2);
+      inputPreco.style.flex = '1';
+
+      const btnSalvar = document.createElement('button');
+      btnSalvar.textContent = 'Salvar';
+      btnSalvar.className = 'comprar-btn';
+      btnSalvar.style.flex = '1';
+
+      btnSalvar.onclick = () => {
+        const nome = inputNome.value.trim();
+        const qtd = parseInt(inputQtd.value);
+        const preco = parseFloat(inputPreco.value.replace(',', '.'));
+
+        if (!nome || isNaN(qtd) || qtd < 1 || isNaN(preco) || preco < 0) {
+          alert('Por favor, preencha valores válidos.');
+          return;
+        }
+
+        item.nome = nome;
+        item.quantidade = qtd;
+        item.preco = preco;
+        item.subtotal = preco * qtd;
+
+        li.remove();
+        criarItemNaTela(item, tipoLista);
+        salvarLocalStorage();
+        atualizarUI();
+      };
+
+      li.appendChild(inputNome);
+      li.appendChild(inputQtd);
+      li.appendChild(inputPreco);
+      li.appendChild(btnSalvar);
+    }
+
+    // Adiciona novo item
+    function adicionarItem() {
+      const nome = document.getElementById('item').value.trim();
+      const qtd = parseInt(document.getElementById('quantidade').value);
+      const preco = parseFloat(document.getElementById('preco').value.replace(',', '.'));
+
+      if (!nome) {
+        alert('Por favor, insira o nome do item.');
+        return;
+      }
+      if (isNaN(qtd) || qtd < 1) {
+        alert('Quantidade inválida.');
+        return;
+      }
+      if (isNaN(preco) || preco < 0) {
+        alert('Preço inválido.');
+        return;
+      }
+
+      const item = {
+        nome,
+        quantidade: qtd,
+        preco,
+        subtotal: preco * qtd,
+        comprado: false
+      };
+
+      listaCompras.push(item);
+      criarItemNaTela(item, 'pendentes');
+      salvarLocalStorage();
+      atualizarUI();
+
+      // Limpar inputs
+      document.getElementById('item').value = '';
+      document.getElementById('quantidade').value = '1';
+      document.getElementById('preco').value = '';
+    }
+
+    // --- CÓDIGO ATUALIZADO ABAIXO ---
+
+    // Função para atualizar o texto do botão de tema
+    function atualizarTextoBotaoModo() {
+      const btnToggleDark = document.getElementById('toggleDark');
+      if (document.body.classList.contains('dark')) {
+        btnToggleDark.textContent = 'Modo Claro';
+      } else {
+        btnToggleDark.textContent = 'Modo Escuro';
+      }
+    }
+
+    // Alterna modo escuro
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      if(document.body.classList.contains('dark')){
+        localStorage.setItem('modoEscuro', 'true');
+      } else {
+        localStorage.removeItem('modoEscuro');
+      }
+      // Chama a função para atualizar o texto após o clique
+      atualizarTextoBotaoModo();
+    }
+
+    // Inicia o modo escuro se estiver salvo
+    function iniciarModoEscuro() {
+      if(localStorage.getItem('modoEscuro') === 'true'){
+        document.body.classList.add('dark');
+      }
+      // Chama a função para garantir que o texto esteja correto ao carregar a página
+      atualizarTextoBotaoModo();
+    }
+
+    document.getElementById('toggleDark').addEventListener('click', toggleDarkMode);
+
+    // Inicialização
+    iniciarModoEscuro();
+    carregarLocalStorage();
+  </script>
+</body>
+</html>
